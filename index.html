@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Introducció a Twig per a Drupal 8</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css">
@@ -24,8 +24,322 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h1>Introducció a Twig</h1>
+					<h3>per al Drupal 8</h3>
+					<p>
+						<small>by <a href="http://drupal.org/u/rvilar">Ramon Vilar</a> / <a href="http://twitter.com/rvilar">@rvilar</a></small>
+					</p>
+				</section>
+				<section>
+					<h2>Qui sóc</h2>
+					<img src="images/ramon.jpg" style="width: 300px; float: left" alt="Me" />
+                    <h3 style="text-transform: none; padding-top: 60px">Ramon Vilar</h3>
+                    <p>Fundador d'Ymbra</p>
+                    <p><a href="http://twitter.com/rvilar">@rvilar</a></p>
+                    <img src="images/logo.png" alt="Ymbra" style="width: 350px; background: #fff" />
+				</section>
+				<section>
+					<h2>Abans de començar...</h2>
+					<p class="fragment">Quants treballeu amb el Drupal?</p>
+					<p class="fragment">Quants themers a la sala?</p>
+					<p class="fragment">Quants heu provat el Drupal 8?</p>
+					<p class="fragment">Quants tornaríeu enrere al Drupal 7?</p>
+				</section>
+				<section>
+					<h2>Coses a oblidar</h2>
+					<ul>
+						<li class="fragment"><code>theme()</code> s'han transformat en plantilles</li>
+						<li class="fragment"><code>template_process_hook()</code> desapareix</li>
+						<li class="fragment">Ara tot són <em>render arrays</em></li>
+					</ul>
+				</section>
+				<section>
+					<section>
+						<h2><code>my_theme</code></h2>
+						<p>Crearem una carpeta <code>my_theme</code> a <code>/themes</code></p>
+						<p class="fragment"><strong>Mai</strong> crear-los a la carpeta <code>/core/themes</code></p>
+						<p class="fragment">Bona pràctica crear les subcarpetes <code>/themes/contrib</code> i <code>/themes/custom</code></p>
+					</section>
+					<section>
+						<h2><code><em>my_theme</em>.info.yml</code></h2>
+						<pre><code class="language-yaml">name: My theme
+type: theme
+base theme: classy
+description: 'My custom theme for Drupal.cat'
+core: 8.x
+regions:
+  header: Header
+  content: Content  # the content region is required
+  sidebar_first: 'Sidebar first'
+  footer: Footer</code></pre>
+					</section>
+					<section>
+						<h2>Temes base</h2>
+						<p>Al crear un tema podrem escollir entre dos temes base del nucli:</p>
+						<dl>
+    						<dt>Stable</dt>
+    						<dd>Marcat mínim i molt poques classes. Conté totes les plantilles i CSS del nucli.</dd>
+							<dt>Classy</dt>
+							<dd>Proporciona classes predeterminades que es poden usar per donar estils.</dd>
+						</dl>
+					</section>
+					<section>
+						<h2>Stable</h2>
+						<pre><code class="language-html">&lt;body&gt;...markup...&lt;/body&gt;</code></pre>
+						<h2>Classy</h2>
+						<pre><code class="language-html">&lt;body class="layout-one-sidebar layout-sidebar-first path-node page-node-type-article"&gt;...markup...&lt;/body&gt;</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Treballar amb Twig</h2>
+					</section>
+					<section>
+						<h2>Variables</h2>
+						<p>Imprimir variable</p>
+						<pre><code class="language-twig">&lt;h2{{ title_attributes }}&gt;{{ label }}&lt;/h2&gt;</code></pre>
+						<p>Assignar valors a variable</pe>
+						<pre><code class="language-twig">{%
+  set classes = [
+    'block',
+    'block-' ~ configuration.provider|clean_class,
+    'block-' ~ plugin_id|clean_class,
+  ]
+%}</code></pre>
+					</section>
+					<section>
+						<h2>Accedir a variables</h2>
+						<pre><code class="language-twig">{{ foo.bar }}</code></pre>
+						<p>Executa la següent cadena per obtenir el valor</p>
+						<pre><code class="language-php">// Element d'un array.
+$foo['bar'];
+// Propietat d'un objecte.
+$foo->bar;
+// Mètode d'un objecte.
+$foo->bar();
+// Get d'un objecte.
+$foo->getBar();
+// Existència del valor.
+$foo->isBar();</code></pre>
+					</section>
+					<section>
+						<h2>Condicionals</h2>
+						<pre><code class="language-twig">{% if not page %}
+  &lt;h2{{ title_attributes }}&gt;
+    &lt;a href="{{ url }}" rel="bookmark"&gt;{{ label }}&lt;/a&gt;
+  &lt;/h2&gt;
+{% endif %}</code></pre>
+
+<pre><code class="language-twig">{% if (summary is not empty) or (description is not empty) %}
+  &lt;details&gt;
+    {% if summary is not empty %}
+      &lt;summary&gt;{{ summary }}&lt;/summary&gt;
+    {% endif %}
+    {% if description is not empty %}
+      {{ description }}
+    {% endif %}
+  &lt;/details&gt;
+{% endif %}</code></pre>
+					</section>
+					<section>
+						<h2>Estructures de control</h2>
+						<p>Estructura for simple</p>
+						<pre><code class="language-twig">{% for content in column.content %}
+  {{- content.separator }}{{ content.field_output -}}
+{% endfor %}</code></pre>
+						<p>Iterant per clau i valor</p>
+						<pre><code class="language-twig">{% for key, column in row.columns %}
+  &lt;a href="#{{ key }}&gt;{{ column }}&lt;/a&gt;
+{% endfor %}</code></pre>
+					</section>
+					<section>
+						<h2>Atributs</h2>
+						<p>Imprimir atributs d'una etiqueta</p>
+						<pre><code class="language-twig">&lt;div{{ attributes }}&gt;</code></pre>
+						<p>Podem imprimir només allò que volem</p>
+						<pre><code class="language-twig">&lt;div class="myclass {{ attributes.class }}"{{ attributes|without('class') }}&gt;</code></pre>
+					</section>
+					<section>
+						<h2>Atributs II</h2>
+						<p>Manipular els valors</p>
+						<pre><code class="language-twig">&lt;div{{ attributes.addClass('hello').removeClass('bye') }}&gt;</code></pre>
+						<p>Condicionals</p>
+						<pre><code class="language-twig">{% if attributes.hasClass('field-label-inline') %}
+  {# My inline custom code #}
+{% endif %}</code></pre>
+					</section>
+					<section>
+						<h2>Atributs III</h2>
+						<p>Establir valors</p>
+						<pre><code class="language-twig">&lt;div{{ attributes.setAttribute('id', 'menu-link') }}&gt;</code></pre>
+						<p>Esborrar valors</p>
+						<pre><code class="language-twig">&lt;div{{ attributes.removeAttribute('id') }}&gt;</code></pre>
+					</section>
+					<section>
+						<h2>Filtres</h2>
+						<p>S'usen per a manipular les variables</h2>
+						<pre><code class="language-twig">{{ ponies|safe_join(", ")|lower}}</code></pre>
+						<p>Per traduir cadenes</p>
+						<pre><code class="language-twig">&lt;span class="marker"&gt;{{ 'New'|t }}&lt;/span&gt;</code></pre>
+						<p>Tot i que per a traduir cadenes amb variables es pot usar</p>
+						<pre><code class="language-twig">{% trans %}Submitted by {{ author_name }} on {{ date }}{% endtrans %}</code></pre>
+						<small>Altres exemples <code class="language-twig">clean_class</code>, <code class="language-twig">format_date</code>, <code class="language-twig">without</code>, <code class="language-twig">drupal_escape</code>,...</small>
+					</section>
+					<section>
+						<h2>Herència de plantilles</h2>
+						<p>Es poden definir zones a les plantilles que després poden ser modificades en d'altres</p>
+						<p>Fitxer: <code>block.html.twig</code></p>
+						<pre><code class="language-twig">&lt;div{{ attributes.addClass(classes) }}&gt;
+  {{ title_prefix }}
+  {% if label %}
+    &lt;h2{{ title_attributes }}&gt;{{ label }}&lt;/h2&gt;
+  {% endif %}
+  {{ title_suffix }}
+  {% block content %}
+    {{ content }}
+  {% endblock %}
+&lt;/div&gt;</code></pre>
+					</section>
+					<section>
+						<h2>Herència de plantilles II</h2>
+						<p>Fitxer: <code>block--local-actions-block.html.twig</code></p>
+						<pre><code class="language-twig">{% extends "block.html.twig" %}
+{#
+/**
+ * @file
+ * Theme override for local actions (primary admin actions.)
+ */
+#}
+{% block content %}
+  {% if content %}
+    &lt;nav class="action-links"&gt;{{ content }}&lt;/nav&gt;
+  {% endif %}
+{% endblock %}</code></pre>
+					</section>
+					<section>
+						<h2>Debugging</h2>
+						<p><code>services.yml:</code></p>
+				        <pre><code class="language-yaml">parameters:
+  twig.config:
+    debug: true</code></pre>
+			            <p>Obtenim de sortida</p>
+			            <pre><code class="language-html">&lt;!-- THEME DEBUG --&gt;
+&lt;!-- THEME HOOK: 'block' --&gt;
+&lt;!-- FILE NAME SUGGESTIONS:
+   * block--bartik-powered.html.twig
+   * block--system-powered-by-block.html.twig
+   * block--system.html.twig
+   x block.html.twig
+--&gt;
+&lt;!-- BEGIN OUTPUT from 'core/modules/block/templates/block.html.twig' --&gt;
+&lt;div class=&quot;block block-system contextual-region&quot; id=&quot;block-bartik-powered&quot; role=&quot;complementary&quot;&gt;
+  &lt;div data-contextual-id=&quot;block:block=bartik_powered:&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;content&quot;&gt;
+    &lt;span&gt;Powered by &lt;a href=&quot;http://drupal.org&quot;&gt;Drupal&lt;/a&gt;&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;!-- END OUTPUT from 'core/modules/block/templates/block.html.twig' --&gt;
+</code></pre>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h2>Afegir CSS i JS al nostre tema</h2>
+						<p>Ara tots els fitxers a carregar es defineixen a <code><em>my_theme</em>.libraries.yml</code></p>
+						<pre><code class="language-yaml">my-library:
+  version: 1.x
+  css:
+    theme:
+      css/my-library.css: {}
+  js:
+    js/my-library.js: {}</code></pre>
+					</section>
+					<section>
+						<h2>Afegir CSS global</h2>
+						<pre><code class="language-yaml">global-styling:
+  version: 1.x
+  css:
+    component:
+      css/components/action-links.css: { weight: -10 }
+      css/components/breadcrumb.css: { weight: -10 }
+      css/components/button.css: { weight: -10 }
+    layout:
+      css/layout.css: {}
+    theme:
+      css/style.css: {}
+      css/colors.css: {}
+      css/print.css: { media: print }</code></pre>
+					</section>
+					<section>
+						<h2>Gestió de dependències</h2>
+						<p>Drupal 8 no carrega jQuery, per exemple, si no li especifiquem.</p>
+						<pre><code class="language-yaml">my-library:
+  version: 1.x
+  css:
+    theme:
+      css/my-library.css: {}
+  js:
+    js/my-library.js: {}
+  dependencies:
+    - core/jquery</code></pre>
+					</section>
+					<section>
+						<h2>Afegir una biblioteca</h2>
+						<p>De forma global</h2>
+						<pre><code class="language-yaml">name: My theme
+type: theme
+base theme: classy
+description: 'My custom theme for Drupal.cat'
+core: 8.x
+libraries:
+  - my_theme/my-library</code></pre>
+					</section>
+					<section>
+						<h2>Afegir una biblioteca II</h2>
+						<p>En un template de Twig</h2>
+						<pre><code class="language-twig">{{ attach_library('my_theme/my-library') }}
+&lt;div&gt;Some markup {{ message }}&lt;/div&gt;</code></pre>
+					</section>
+					<section>
+						<h2>Afegir una biblioteca III</h2>
+						<p>En una pàgina concreta, hem de crear el fitxer <code>my_theme.theme</code></p>
+						<pre><code class="language-php">function my_theme_preprocess_page(&$variables) {
+  $variables['#cache']['contexts'][] = 'route';
+  if (\Drupal::routeMatch()->getRouteName() === 'entity.node.preview') {
+    $variables['#attached']['library'][] = 'my_theme/my-library';
+  }
+}</code></pre>
+					</section>
+				</section>
+				<section>
+					<h2><code><em>my_theme</em>.breakpoints.yml</code></h2>
+					<pre><code class="language-yaml">my_theme.mobile:
+  label: mobile
+  mediaQuery: ''
+  weight: 0
+  multipliers:
+    - 1x
+my_theme.narrow:
+  label: narrow
+  mediaQuery: 'all and (min-width: 560px) and (max-width: 850px)'
+  weight: 1
+  multipliers:
+    - 1x
+my_theme.wide:
+  label: wide
+  mediaQuery: 'all and (min-width: 851px)'
+  weight: 2
+  multipliers:
+    - 1x</code></pre>
+				</section>
+				<section>
+					<h2>Moltes gràcies pel vostre temps</h2>
+					<h3 style="text-transform: none; padding-top: 60px">Ramon Vilar</h3>
+                    <p><a href="http://twitter.com/rvilar">@rvilar</a></p>
+                    <p><a href="http://ymbra.com">http://ymbra.com</a></p>
+                    <img src="images/logo.png" alt="Ymbra" style="width: 350px; background: #fff" />
+				</section>
 			</div>
 		</div>
 
