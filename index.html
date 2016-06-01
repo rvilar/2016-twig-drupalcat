@@ -56,13 +56,16 @@
 				</section>
 				<section>
 					<section>
-						<h2><code>my_theme</code></h2>
-						<p>Crearem una carpeta <code>my_theme</code> a <code>/themes</code></p>
+						<h2><code>mytheme</code></h2>
+						<p>Crearem una carpeta <code>mytheme</code> a <code>/themes</code></p>
 						<p class="fragment"><strong>Mai</strong> crear-los a la carpeta <code>/core/themes</code></p>
 						<p class="fragment">Bona pràctica crear les subcarpetes <code>/themes/contrib</code> i <code>/themes/custom</code></p>
 					</section>
 					<section>
-						<h2><code><em>my_theme</em>.info.yml</code></h2>
+						<img src="images/drupal8-folder.png">
+					</section>
+					<section>
+						<h2><code><em>mytheme</em>.info.yml</code></h2>
 						<pre><code class="language-yaml">name: My theme
 type: theme
 base theme: classy
@@ -246,7 +249,7 @@ $foo->isBar();</code></pre>
 				<section>
 					<section>
 						<h2>Afegir CSS i JS al nostre tema</h2>
-						<p>Ara tots els fitxers a carregar es defineixen a <code><em>my_theme</em>.libraries.yml</code></p>
+						<p>Ara tots els fitxers a carregar es defineixen a <code><em>mytheme</em>.libraries.yml</code></p>
 						<pre><code class="language-yaml">my-library:
   version: 1.x
   css:
@@ -286,47 +289,80 @@ $foo->isBar();</code></pre>
 					</section>
 					<section>
 						<h2>Afegir una biblioteca</h2>
-						<p>De forma global</h2>
+						<p>De forma global afegint-ho al fitxer <code><em>mytheme</em>.info.yml</code></h2>
 						<pre><code class="language-yaml">name: My theme
 type: theme
 base theme: classy
 description: 'My custom theme for Drupal.cat'
 core: 8.x
 libraries:
-  - my_theme/my-library</code></pre>
+  - mytheme/my-library</code></pre>
 					</section>
 					<section>
 						<h2>Afegir una biblioteca II</h2>
 						<p>En un template de Twig</h2>
-						<pre><code class="language-twig">{{ attach_library('my_theme/my-library') }}
+						<pre><code class="language-twig">{{ attach_library('mytheme/my-library') }}
 &lt;div&gt;Some markup {{ message }}&lt;/div&gt;</code></pre>
 					</section>
 					<section>
 						<h2>Afegir una biblioteca III</h2>
-						<p>En una pàgina concreta, hem de crear el fitxer <code>my_theme.theme</code></p>
-						<pre><code class="language-php">function my_theme_preprocess_page(&$variables) {
+						<p>En una pàgina concreta, hem de crear el fitxer <code>mytheme.theme</code></p>
+						<pre><code class="language-php">function mytheme_preprocess_page(&$variables) {
   $variables['#cache']['contexts'][] = 'route';
   if (\Drupal::routeMatch()->getRouteName() === 'entity.node.preview') {
-    $variables['#attached']['library'][] = 'my_theme/my-library';
+    $variables['#attached']['library'][] = 'mytheme/my-library';
   }
 }</code></pre>
 					</section>
+					<section>
+						<h2>Sobreescriure CSS o JS</h2>
+						<p>Tot això s'ha d'especificar a <code><em>mytheme</em>.info.yml</code></p>
+						<pre><code class="language-yaml">libraries-override:
+  # Reemplaçar una biblioteca sencera.
+  core/drupal.collapse: mytheme/collapse
+  # Reemplaçar un fitxer per un altre
+  subtheme/library:
+    css:
+      theme:
+        css/layout.css: css/my-layout.css
+  # Reemplaçar un fitxer JS del nucli.
+  toolbar/toolbar:
+    js:
+      js/views/BodyVisualView.js: js/views/BodyVisualView.js
+  # Eliminar un fitxer.
+  drupal/dialog:
+    css:
+      theme:
+        dialog.theme.css: false
+  # Eliminar una biblioteca.
+  core/modernizr: false</code></pre>
+					</section>
+					<section>
+						<h2>Estendre biblioteques</h2>
+						<p>Ens pot interessar afegir alguns CSS o JS quan es carregui una biblioteca concreta</p>
+						<p>Tot això s'ha d'especificar a <code><em>mytheme</em>.info.yml</code></p>
+						<pre><code class="language-yaml"># Esten drupal.user del nucli per afegir les nostres biblioteques.
+libraries-extend:
+  core/drupal.user: 
+    - mytheme/user1
+    - mytheme/user2</code></pre>
+					</section>
 				</section>
 				<section>
-					<h2><code><em>my_theme</em>.breakpoints.yml</code></h2>
-					<pre><code class="language-yaml">my_theme.mobile:
+					<h2><code><em>mytheme</em>.breakpoints.yml</code></h2>
+					<pre><code class="language-yaml">mytheme.mobile:
   label: mobile
   mediaQuery: ''
   weight: 0
   multipliers:
     - 1x
-my_theme.narrow:
+mytheme.narrow:
   label: narrow
   mediaQuery: 'all and (min-width: 560px) and (max-width: 850px)'
   weight: 1
   multipliers:
     - 1x
-my_theme.wide:
+mytheme.wide:
   label: wide
   mediaQuery: 'all and (min-width: 851px)'
   weight: 2
@@ -335,9 +371,9 @@ my_theme.wide:
 				</section>
 				<section>
 					<h2>Moltes gràcies pel vostre temps</h2>
+					<h2>Preguntes?</h2>
 					<h3 style="text-transform: none; padding-top: 60px">Ramon Vilar</h3>
                     <p><a href="http://twitter.com/rvilar">@rvilar</a></p>
-                    <p><a href="http://ymbra.com">http://ymbra.com</a></p>
                     <img src="images/logo.png" alt="Ymbra" style="width: 350px; background: #fff" />
 				</section>
 			</div>
